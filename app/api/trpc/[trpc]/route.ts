@@ -6,7 +6,10 @@ const handler = (req: Request) => fetchRequestHandler({
   endpoint: '/api/trpc',
   req,
   router: appRouter,
-  createContext: createTRPCContext
+  createContext: createTRPCContext,
+  onError: ({ path, error }) => {
+    console.error(`Error in tRPC handler on path '${path}':`, error);
+  }
 })
 
 export { handler as GET, handler as POST }
