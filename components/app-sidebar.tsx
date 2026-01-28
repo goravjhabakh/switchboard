@@ -7,9 +7,8 @@ import Image from "next/image"
 import { usePathname, useRouter } from "next/navigation"
 import { authClient } from "@/lib/auth-client"
 import { useState } from "react"
-import { Spinner } from "./ui/spinner"
 import { toast } from "sonner"
-import { useHasActiveSubscription } from "./subscriptions/use-subscription"
+import { useHasActiveSubscription } from "../hooks/use-subscription"
 
 const menuItems = [
   {
