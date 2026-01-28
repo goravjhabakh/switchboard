@@ -1,22 +1,20 @@
-import Client from "@/components/client"
+import Logout from "@/components/auth/logout"
 import { Button } from "@/components/ui/button"
-import { getQueryClient, trpc } from "@/trpc/server"
-import { dehydrate, HydrationBoundary } from "@tanstack/react-query"
-import { Suspense } from "react"
+import { requireAuth } from "@/lib/auth-utils"
+import { caller } from "@/trpc/server"
 
 const Home = async () => {
-  const queryClient = getQueryClient()
-  void queryClient.prefetchQuery(trpc.hello.queryOptions())
+  await requireAuth()
+  
+  const data = await caller.hello()
 
   return (
     <div className="h-screen flex flex-col items-center justify-center space-y-4">
       <h1 className="text-4xl font-bold">Switch Board</h1>
       <Button>Get Started</Button>
-      <HydrationBoundary state={dehydrate(queryClient)}>
-        <Suspense fallback={<div>Loading...</div>}>
-          <Client />
-        </Suspense>
-      </HydrationBoundary>
+
+      <pre className="text-white bg-muted p-4 rounded-md">{JSON.stringify(data, null, 2)}</pre>
+      <Logout />
     </div>
   )
 }
