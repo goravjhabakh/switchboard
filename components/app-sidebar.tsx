@@ -8,6 +8,8 @@ import { usePathname, useRouter } from "next/navigation"
 import { authClient } from "@/lib/auth-client"
 import { useState } from "react"
 import { Spinner } from "./ui/spinner"
+import { toast } from "sonner"
+import { useHasActiveSubscription } from "./subscriptions/use-subscription"
 
 const menuItems = [
   {
@@ -35,7 +37,11 @@ const menuItems = [
 const AppSidebar = () => {
   const router = useRouter()
   const pathname = usePathname()
+  const { hasActiveSubscription, isLoading: subscriptionLoading } = useHasActiveSubscription()
+
   const [signoutLoading, setSignoutLoading] = useState<boolean>(false)
+  const [polarLoading, setPolarLoading] = useState<boolean>(false)
+  const [portalLoading, setPortalLoading] = useState<boolean>(false)
 
   const handleSignout = async () => {
     setSignoutLoading(true)
@@ -44,8 +50,33 @@ const AppSidebar = () => {
         onSuccess: () => {
           router.push('/login')
         },
-        onError: () => {
+        onError: ({ error }) => {
+          toast.error(error?.message || 'Failed to sign out')
           setSignoutLoading(false)
+        }
+      }
+    })
+  }
+
+  const handleUpgrade = async () => {
+    setPolarLoading(true)
+    await authClient.checkout({
+      slug: "Switch-Board-Pro"
+    }, {
+      onError: () => {
+        toast.error('Failed to upgrade')
+        setPolarLoading(false)
+      }
+    })
+  }
+
+  const handlePortal = async () => {
+    setPortalLoading(true)
+    await authClient.customer.portal({
+      fetchOptions: {
+        onError: () => {
+          toast.error('Failed to open portal')
+          setPortalLoading(false)
         }
       }
     })
@@ -89,30 +120,30 @@ const AppSidebar = () => {
           <SidebarMenuItem>
             <SidebarMenuButton
               tooltip={"Logout"}
-              className={`gap-x-4 h-10 px-4 ${signoutLoading ? 'justify-center' : ''}`}
-              onClick={() => handleSignout()}
-            >
-              {signoutLoading ? (
-                <Spinner />
-              ) : (
-                <>
-                  <LogOutIcon className="h-4 w-4"/>
-                  <span>Logout</span>
-                </>
-              )}
-            </SidebarMenuButton>
-            <SidebarMenuButton
-              tooltip={"Upgrade to Pro"}
               className="gap-x-4 h-10 px-4"
-              onClick={() => {}}
+              onClick={() => handleSignout()}
+              disabled={signoutLoading}
             >
-              <StarIcon className="h-4 w-4"/>
-              <span>Upgrade to Pro</span>
+              <LogOutIcon className="h-4 w-4"/>
+              <span>Logout</span>
             </SidebarMenuButton>
+
+            {!hasActiveSubscription && !subscriptionLoading && (
+              <SidebarMenuButton
+                tooltip={"Upgrade to Pro"}
+                className="gap-x-4 h-10 px-4"
+                onClick={() => handleUpgrade()}
+                disabled={polarLoading}
+              >
+                <StarIcon className="h-4 w-4"/>
+                <span>Upgrade to Pro</span>
+              </SidebarMenuButton>
+            )}
             <SidebarMenuButton
               tooltip={"Billing Portal"}
               className="gap-x-4 h-10 px-4"
-              onClick={() => {}}
+              onClick={() => handlePortal()}
+              disabled={portalLoading}
             >
               <CreditCardIcon className="h-4 w-4"/>
               <span>Billing Portal</span>
