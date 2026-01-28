@@ -5,7 +5,7 @@ const Page = async () => {
   await requireUnAuth()
 
   return (
-    <div className="flex justify-center items-center min-h-screen p-10">
+    <div className="bg-muted flex justify-center items-center min-h-svh p-10">
       <RegisterForm />
     </div>
   )

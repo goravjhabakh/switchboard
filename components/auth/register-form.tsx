@@ -11,6 +11,10 @@ import { Input } from "../ui/input"
 import Link from "next/link"
 import { authClient } from "@/lib/auth-client"
 import { toast } from "sonner"
+import { Spinner } from "../ui/spinner"
+import { useTheme } from "next-themes"
+import Image from "next/image"
+import { useState } from "react"
 
 const registerSchema = z.object({
   fullName: z.string().min(1, "Full name is required"),
@@ -26,6 +30,10 @@ type RegisterFormValues = z.infer<typeof registerSchema>
 
 const RegisterForm = () => {
   const router = useRouter()
+  const { resolvedTheme } = useTheme()
+
+  const [githubLoading, setGithubLoading] = useState<boolean>(false)
+  const [googleLoading, setGoogleLoading] = useState<boolean>(false)
 
   const form = useForm<RegisterFormValues>({
     resolver: zodResolver(registerSchema),
@@ -53,6 +61,30 @@ const RegisterForm = () => {
     })
   }
 
+  const handleGithub = async () => {
+    setGithubLoading(true)
+    await authClient.signIn.social({
+      provider: "github",
+      callbackURL: '/'
+    }, {
+      onError: (ctx) => {
+        toast.error(ctx.error.message)
+      }
+    })
+  }
+
+  const handleGoogle = async () => {
+    setGoogleLoading(true)
+    await authClient.signIn.social({
+      provider: "google",
+      callbackURL: '/'
+    }, {
+      onError: (ctx) => {
+        toast.error(ctx.error.message)
+      }
+    })
+  }
+
   const isPending = form.formState.isSubmitting
 
   return (
@@ -67,11 +99,13 @@ const RegisterForm = () => {
             <form onSubmit={form.handleSubmit(handleSubmit)}>
               <div className="grid gap-6">
                 <div className="grid grid-cols-2 gap-4">
-                  <Button variant={'outline'} className="w-full" type="button" disabled={isPending}>
-                    Continue with Github
+                  <Button variant={'outline'} className="w-full gap-2" type="button" disabled={isPending || githubLoading || googleLoading} onClick={handleGithub}>
+                    {githubLoading ? <Spinner /> : <Image src={resolvedTheme === 'dark' ? "/github-dark.svg" : "/github-light.svg"} alt="Github" width={24} height={24}/>}
+                    {githubLoading ? "" : "Continue with Github"}
                   </Button>
-                  <Button variant={'outline'} className="w-full" type="button" disabled={isPending}>
-                    Continue with Google
+                  <Button variant={'outline'} className="w-full gap-2" type="button" disabled={isPending || githubLoading || googleLoading} onClick={handleGoogle}>
+                    {googleLoading ? <Spinner /> : <Image src="/google.png" alt="Google" width={20} height={20}/>}
+                    {googleLoading ? "" : "Continue with Google"}
                   </Button>
                 </div>
                 <div className="grid gap-6">
@@ -115,7 +149,9 @@ const RegisterForm = () => {
                     </FormItem>
                   )}/>
 
-                  <Button type="submit" className="w-full" disabled={isPending}>Register</Button>
+                  <Button type="submit" className="w-full" disabled={isPending || githubLoading || googleLoading}>
+                    {isPending ? <Spinner /> : "Register"}
+                  </Button>
                 </div>
                 <div className="text-center text-sm">
                   Already have an account? {" "}

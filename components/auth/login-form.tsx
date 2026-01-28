@@ -11,6 +11,10 @@ import { Input } from "../ui/input"
 import Link from "next/link"
 import { authClient } from "@/lib/auth-client"
 import { toast } from "sonner"
+import Image from "next/image"
+import { Spinner } from "../ui/spinner"
+import { useTheme } from "next-themes"
+import { useState } from "react"
 
 const loginSchema = z.object({
   email: z.email("Please enter a valid email address"),
@@ -21,6 +25,10 @@ type LoginFormValues = z.infer<typeof loginSchema>
 
 const LoginForm = () => {
   const router = useRouter()
+  const { resolvedTheme } = useTheme()
+
+  const [githubLoading, setGithubLoading] = useState<boolean>(false)
+  const [googleLoading, setGoogleLoading] = useState<boolean>(false)
 
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
@@ -45,6 +53,30 @@ const LoginForm = () => {
     })
   }
 
+  const handleGithub = async () => {
+    setGithubLoading(true)
+    await authClient.signIn.social({
+      provider: "github",
+      callbackURL: '/'
+    }, {
+      onError: (ctx) => {
+        toast.error(ctx.error.message)
+      }
+    })
+  }
+
+  const handleGoogle = async () => {
+    setGoogleLoading(true)
+    await authClient.signIn.social({
+      provider: "google",
+      callbackURL: '/'
+    }, {
+      onError: (ctx) => {
+        toast.error(ctx.error.message)
+      }
+    })
+  }
+
   const isPending = form.formState.isSubmitting
 
   return (
@@ -59,11 +91,13 @@ const LoginForm = () => {
             <form onSubmit={form.handleSubmit(handleSubmit)}>
               <div className="grid gap-6">
                 <div className="grid grid-cols-2 gap-4">
-                  <Button variant={'outline'} className="w-full" type="button" disabled={isPending}>
-                    Continue with Github
+                  <Button variant={'outline'} className="w-full gap-2" type="button" disabled={isPending || githubLoading || googleLoading} onClick={handleGithub}>
+                    {githubLoading ? <Spinner /> : <Image src={resolvedTheme === 'dark' ? "/github-dark.svg" : "/github-light.svg"} alt="Github" width={24} height={24}/>}
+                    {githubLoading ? "" : "Continue with Github"}
                   </Button>
-                  <Button variant={'outline'} className="w-full" type="button" disabled={isPending}>
-                    Continue with Google
+                  <Button variant={'outline'} className="w-full gap-2" type="button" disabled={isPending || githubLoading || googleLoading} onClick={handleGoogle}>
+                    {googleLoading ? <Spinner /> : <Image src="/google.png" alt="Google" width={20} height={20}/>}
+                    {googleLoading ? "" : "Continue with Google"}
                   </Button>
                 </div>
                 <div className="grid gap-6">
@@ -87,7 +121,9 @@ const LoginForm = () => {
                     </FormItem>
                   )}/>
 
-                  <Button type="submit" className="w-full" disabled={isPending}>Login</Button>
+                  <Button type="submit" className="w-full" disabled={isPending || githubLoading || googleLoading}>
+                    {isPending ? <Spinner /> : "Login"}
+                  </Button>
                 </div>
                 <div className="text-center text-sm">
                   Don&apos;t have an account? {" "}
