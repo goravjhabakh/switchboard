@@ -4,7 +4,7 @@ import { inngest } from '@/inngest/client'
 
 export const appRouter = createTRPCRouter({
   getWorkflows: protectedProcedure.query(() => {
-    return prisma.workflow.findMany() ?? []
+    return prisma.workflow.findMany() ?? null
   }),
   createWorkflow: protectedProcedure.mutation(async () => {
     await inngest.send({
@@ -13,7 +13,10 @@ export const appRouter = createTRPCRouter({
         email: 'test@example.com'
       }
     })
-
+    return { success: true, message: 'Job queued' }
+  }),
+  testAi: protectedProcedure.mutation(async () => {
+    await inngest.send({ name: "execute/workflow" })
     return { success: true, message: 'Job queued' }
   })
 })
