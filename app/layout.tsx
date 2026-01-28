@@ -2,6 +2,7 @@ import type { Metadata } from "next"
 import "./globals.css"
 import { ThemeProvider } from "@/components/theme-provider";
 import { TRPCReactProvider } from "@/trpc/client";
+import { Toaster } from "@/components/ui/sonner";
 
 export const metadata: Metadata = {
   title: "Switch Board",
@@ -16,6 +17,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         <TRPCReactProvider>
           <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
             {children}
+            <Toaster />
           </ThemeProvider>
         </TRPCReactProvider>
       </body>
