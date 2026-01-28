@@ -11,7 +11,7 @@ const Page = async ({ params }: PageProps) => {
   const { workflowId } = await params
 
   return (
-    <div>Workflow ID: {workflowId}</div>
+    <div className="p-10">Workflow ID: {workflowId}</div>
   )
 }
 export default Page
