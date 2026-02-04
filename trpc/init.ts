@@ -1,7 +1,7 @@
 import { cache } from "react"
 import { initTRPC, TRPCError } from '@trpc/server'
 import superjson from 'superjson'
-import { auth } from "@/lib/auth"
+import { auth } from "@/lib/auth/auth"
 import { headers } from "next/headers"
 import { polarClient } from "@/lib/polar"
 
