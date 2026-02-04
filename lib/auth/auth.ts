@@ -1,8 +1,8 @@
 import { betterAuth } from "better-auth"
 import { polar, checkout, portal, usage, webhooks } from '@polar-sh/better-auth'
 import { prismaAdapter } from "better-auth/adapters/prisma"
-import prisma from "./prisma"
-import { polarClient } from "./polar"
+import prisma from "../prisma"
+import { polarClient } from "../polar"
 
 export const auth = betterAuth({
   database: prismaAdapter(prisma, {

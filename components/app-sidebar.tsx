@@ -5,7 +5,7 @@ import { Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupConte
 import Link from "next/link"
 import Image from "next/image"
 import { usePathname, useRouter } from "next/navigation"
-import { authClient } from "@/lib/auth-client"
+import { authClient } from "@/lib/auth/auth-client"
 import { useState } from "react"
 import { toast } from "sonner"
 import { useHasActiveSubscription } from "../hooks/use-subscription"

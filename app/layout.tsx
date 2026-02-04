@@ -1,8 +1,8 @@
 import type { Metadata } from "next"
 import "./globals.css"
-import { ThemeProvider } from "@/components/theme-provider";
 import { TRPCReactProvider } from "@/trpc/client";
 import { Toaster } from "@/components/ui/sonner";
+import { NuqsAdapter } from 'nuqs/adapters/next/app'
 
 export const metadata: Metadata = {
   title: "Switch Board",
@@ -12,13 +12,13 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body className="antialiased">
+    <html lang="en">
+      <body className="dark antialiased">
         <TRPCReactProvider>
-          <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+          <NuqsAdapter>
             {children}
             <Toaster />
-          </ThemeProvider>
+          </NuqsAdapter>
         </TRPCReactProvider>
       </body>
     </html>
