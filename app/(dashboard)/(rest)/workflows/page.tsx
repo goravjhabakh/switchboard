@@ -1,4 +1,4 @@
-import { WorkflowsContainer, WorkflowsList } from "@/components/workflows"
+import { WorkflowsContainer, WorkflowsError, WorkflowsList, WorkflowsLoading } from "@/components/workflows"
 import { requireAuth } from "@/lib/auth/auth-utils"
 import { workflowsParamsLoader } from "@/lib/workflows/params-loader"
 import { prefetchWorkflows } from "@/trpc/prefetch/workflow"
@@ -18,11 +18,11 @@ const Page = async ({ searchParams }: Props) => {
   prefetchWorkflows(params)
 
   return (
-    <div>
+    <div className="h-full">
       <WorkflowsContainer>
         <HydrateClient>
-          <ErrorBoundary fallback={<p>Something went wrong</p>}>
-            <Suspense fallback={<p>Loading...</p>}>
+          <ErrorBoundary fallback={<WorkflowsError />}>
+            <Suspense fallback={<WorkflowsLoading />}>
               <WorkflowsList />
             </Suspense>
           </ErrorBoundary>
