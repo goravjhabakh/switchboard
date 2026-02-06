@@ -3,13 +3,22 @@ import { createTRPCRouter, premiumProcedure, protectedProcedure } from "../init"
 import { generateSlug } from "random-word-slugs";
 import z from "zod";
 import { PAGINATION } from "@/lib/constants";
+import { NodeType } from "@/lib/generated/prisma/enums";
+import type { Node, Edge } from "@xyflow/react";
 
 export const workflowsRouter = createTRPCRouter({
   create: premiumProcedure.mutation(async ({ ctx }) => {
     return await prisma.workflow.create({
       data: {
         name: generateSlug(2),
-        userId: ctx.auth.user.id
+        userId: ctx.auth.user.id,
+        nodes: {
+          create: {
+            type: NodeType.INITIAL,
+            position: { x: 0, y: 0 },
+            name: NodeType.INITIAL
+          }
+        }
       }
     })
   }),
@@ -43,12 +52,35 @@ export const workflowsRouter = createTRPCRouter({
   getOne: protectedProcedure.input(z.object({
     id: z.string()
   })).query(async ({ ctx, input }) => {
-    return await prisma.workflow.findUniqueOrThrow({
+    const workflow = await prisma.workflow.findUniqueOrThrow({
       where: {
         id: input.id,
         userId: ctx.auth.user.id
+      },
+      include: {
+        nodes: true,
+        connections: true
       }
     })
+
+    // transforming db node to react flow node
+    const nodes: Node[] = workflow.nodes.map((node) => ({
+      id: node.id,
+      type: node.type,
+      position: node.position as { x: number, y: number },
+      data: (node.data as Record<string, unknown> || {})
+    }))
+
+    // transforming db connections to react flow edges
+    const edges: Edge[] = workflow.connections.map((connection) => ({
+      id: connection.id,
+      source: connection.fromNodeId,
+      target: connection.toNodeId,
+      sourceHandle: connection.fromOutput,
+      targetHandle: connection.toInput
+    }))
+
+    return { id: workflow.id, name: workflow.name, nodes, edges }
   }),
 
   getMany: protectedProcedure.input(z.object({
