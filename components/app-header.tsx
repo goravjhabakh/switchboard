@@ -7,4 +7,4 @@ const AppHeader = () => {
     </header>
   )
 }
-export default AppHeader
+export default AppHeader 
